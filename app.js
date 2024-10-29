@@ -2,7 +2,7 @@
 const express = require('express')
 
 const app = express();
-
+    
 app.listen(8000, (err) => {
-    console.log("Połąćżenie");
+    console.log("Server started");
 });
