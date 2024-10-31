@@ -1,20 +1,24 @@
 {
   "name": "nodejs_back_end",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
-  "main": "app.js",
+  "main": "app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "tsx watch ./app.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.1",
-    "mysql": "^2.18.1",
-    "nodemon": "^3.1.7"
+    "mysql": "^2.18.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }
 }
