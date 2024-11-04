@@ -23,19 +23,80 @@ export default {
             }
         });
     },
-    // addNewUser(
-    //     login: string,
-    //     email: string,
-    //     password: string,
-    //     repeatedPassword: string
-    // ): boolean {
+    async addNewUser(
+        login: string,
+        email: string,
+        passwordSHA256: string
+    ): Promise<boolean> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(false);
 
-    //     return true;
-    // },
-    // ifUserExists(login: string, email): boolean {
-    //     var query = `SELECT COUNT(*) FROM users WHERE name = '${login}' or email = '${email}'`;
-    //     return true;
-    // },
+            var query = `INSERT INTO users(name, email, password) VALUES (${connection.escape(
+                login
+            )},${connection.escape(email)},'${passwordSHA256}')`;
+
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                }
+                return resolve(true);
+            });
+        });
+    },
+    async isEmailUsed(email: string): Promise<boolean | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+
+            var query = `SELECT COUNT(*) AS amount FROM users WHERE email = ${connection.escape(
+                email
+            )}`;
+
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result?.length == 0) {
+                    return resolve(null);
+                } else {
+                    if (result[0]["amount"] > 0) {
+                        return resolve(true);
+                    } else {
+                        return resolve(false);
+                    }
+                }
+            });
+            // return true;
+        });
+    },
+    async isLoginUsed(login: string): Promise<boolean | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+
+            var query = `SELECT COUNT(*) FROM users WHERE name = ${connection.escape(
+                login
+            )}`;
+
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result?.length == 0) {
+                    return resolve(true);
+                } else {
+                    return resolve(false);
+                }
+            });
+            // return true;
+        });
+    },
     async getUserData(
         loginOrEmail: string,
         passwordSHA256: string

@@ -18,6 +18,7 @@ export default async function log_in(
         typeof request.body.password !== "string"
     ) {
         response.send({ success: false, code: LoginStatus.InvalidData });
+        return;
     }
 
     var loginOrEmail = encode(request.body.loginOrEmail);

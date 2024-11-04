@@ -6,6 +6,8 @@ enum AddUserStatus {
     EmailInvalid,
     NameInvalid,
     PasswordInvalid,
+    InvalidData,
+    DatabaseError,
 }
 
 export default AddUserStatus;
