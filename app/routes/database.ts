@@ -1,4 +1,5 @@
 import mysql from "mysql";
+import crypto from "crypto";
 import UserData from "../utils/UserData";
 import AddUserStatus from "../utils/AddUserStatus";
 
@@ -23,6 +24,65 @@ export default {
             }
         });
     },
+    async startNewSession(
+        user_id: number,
+        ip_address: string
+    ): Promise<string | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+
+            var query = `DELETE FROM user_session WHERE ip_address = '${ip_address}'`;
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+                const id = crypto.randomUUID();
+
+                var date = new Date();
+                date.setDate(date.getDate() + 1);
+
+                var query = `INSERT INTO user_session VALUES ('${id}', '${ip_address}', ${user_id}, '${date
+                    .toISOString()
+                    .slice(0, 19)
+                    .replace("T", " ")}')`;
+
+                connection.query(query, (err) => {
+                    if (err) {
+                        console.log("database error");
+                        console.log(err);
+                        return resolve(null);
+                    }
+                    return resolve(id);
+                });
+            });
+        });
+    },
+    async checkSession(
+        session_id: string,
+        ip_adress: string
+    ): Promise<boolean> {
+        return new Promise(async (resolve) => {});
+    },
+    async deleteSession(session_id: string): Promise<boolean> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(false);
+
+            var query = `DELETE FROM user_session WHERE session_id = ${connection.escape(
+                session_id
+            )}`;
+
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                }
+                return resolve(true);
+            });
+        });
+    },
     async addNewUser(
         login: string,
         email: string,
@@ -35,7 +95,7 @@ export default {
                 login
             )},${connection.escape(email)},'${passwordSHA256}')`;
 
-            connection.query(query, (err, result) => {
+            connection.query(query, (err) => {
                 if (err) {
                     console.log("database error");
                     console.log(err);
@@ -122,6 +182,7 @@ export default {
                 const data = result[0];
 
                 var userData = new UserData(
+                    data["id"],
                     data["name"],
                     data["email"],
                     data["profile_picture"],

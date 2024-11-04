@@ -6,6 +6,7 @@ import database from "./app/routes/database.ts";
 import register from "./app/routes/register.ts";
 // const upload = multer({ dest: "uploads/" });
 import log_in from "./app/routes/log_in.ts";
+import log_out from "./app/routes/log_out.ts";
 
 const app = express();
 
@@ -23,6 +24,8 @@ app.post("/log-in", log_in);
 
 app.post("/register", register);
 
-app.listen(8000, () => {
+app.post("/log-out", log_out);
+
+app.listen(8000, "0.0.0.0", () => {
     console.log("Server started");
 });

@@ -28,17 +28,20 @@ export default async function log_in(
         .digest("hex");
 
     const userData = await database.getUserData(loginOrEmail, passwordSHA256);
-
-    if (userData != null) {
-        response.send({
-            success: true,
-            code: LoginStatus.Yupii,
-            data: userData,
-        });
-    } else {
+    if (userData == null) {
         response.send({
             success: false,
             code: LoginStatus.InvalidData,
         });
+        return;
     }
+    var session_id = await database.startNewSession(userData!.id, request.ip);
+
+    response.send({
+        success: true,
+        code: LoginStatus.Yupii,
+        data: {
+            session_id: session_id,
+        },
+    });
 }
