@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 // import multer from "multer";
-import database from "./app/routes/database.ts";
+import database from "./app/utils/database.ts";
 import register from "./app/routes/register.ts";
 // const upload = multer({ dest: "uploads/" });
 import log_in from "./app/routes/log_in.ts";
