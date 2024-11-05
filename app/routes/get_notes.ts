@@ -52,6 +52,7 @@ export default async function get_notes(
     }
 
     var notes = await database.getNotes(userData.id);
+
     if (notes == null) {
         response.send({
             success: false,

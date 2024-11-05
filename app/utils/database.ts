@@ -32,7 +32,6 @@ export default {
             var query = `INSERT INTO user_note_relations(id_user, id_note, owner, can_modify) VALUES (${user_id},${connection.escape(
                 note_id
             )},1,1)`;
-
             connection.query(query, (err) => {
                 if (err) {
                     console.log("database error");
@@ -76,6 +75,27 @@ export default {
             });
         });
     },
+    async getNoteContent(noteID: string): Promise<string | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+            var query = `SELECT content FROM notes WHERE id = ${connection.escape(
+                noteID
+            )}`;
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result.length == 0) {
+                    return resolve(null);
+                } else {
+                    return resolve(result[0]["content"]);
+                }
+            });
+        });
+    },
     async modifyNote(noteID: string, noteContent: string): Promise<boolean> {
         return new Promise(async (resolve) => {
             if (!connected) return resolve(false);
@@ -99,7 +119,15 @@ export default {
 
                 var toReturn = Array<Note>();
                 result.forEach((element) => {
-                    console.log(element);
+                    toReturn.push(
+                        new Note(
+                            element["id"],
+                            element["title"],
+                            element["create_time"],
+                            element["modification_time"],
+                            undefined
+                        )
+                    );
                 });
                 return resolve(toReturn);
             });
@@ -247,7 +275,6 @@ export default {
                     }
 
                     const data = result[0];
-                    console.log(data);
                     var userData = new UserData(
                         data["id"],
                         data["name"],
@@ -319,7 +346,6 @@ export default {
             var query = `SELECT * FROM users WHERE id = (SELECT user_id FROM user_session WHERE session_id = ${connection.escape(
                 session_id
             )})`;
-            console.log(query);
 
             connection.query(query, (err, result) => {
                 if (err) {
