@@ -6,6 +6,7 @@ import register from "./app/routes/register.ts";
 import log_in from "./app/routes/log_in.ts";
 import log_out from "./app/routes/log_out.ts";
 import check_session from "./app/routes/check_session.ts";
+import create_note from "./app/routes/create_note.ts";
 
 const app = express();
 
@@ -14,8 +15,9 @@ database.startConnection();
 app.use(bodyParser.json());
 app.use(cors());
 
+app.post("/create-note", create_note);
+
 app.post("/get-notes", () => {});
-app.post("/create-note", () => {});
 app.post("/read-note", () => {});
 app.post("/delete-note", () => {});
 app.post("/get-profile-data", () => {});

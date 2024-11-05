@@ -1,8 +1,8 @@
 import mysql from "mysql";
 import crypto from "crypto";
-import AddUserStatus from "../utils/AddUserStatus";
-import SessionStatus from "../utils/SessionStatus";
 import UserData from "./UserData";
+import AddUserStatus from "./AddUserStatus";
+import SessionStatus from "./SessionStatus";
 
 var connection: mysql.Connection;
 var connected = false;
@@ -25,9 +25,50 @@ export default {
             }
         });
     },
-    async createNote(noteContent: string): Promise<boolean> {
+    async setNoteOwner(note_id: string, user_id: number): Promise<boolean> {
         return new Promise(async (resolve) => {
             if (!connected) return resolve(false);
+            var query = `INSERT INTO user_note_relations(id_user, id_note, owner, can_modify) VALUES (${user_id},${connection.escape(
+                note_id
+            )},1,1)`;
+            console.log(query);
+
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                } else {
+                    return resolve(true);
+                }
+            });
+        });
+    },
+    async createNote(noteContent: string): Promise<string | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+
+            const id = crypto.randomUUID();
+            var date = new Date();
+
+            var formatedDate = date
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ");
+
+            var query = `INSERT INTO notes VALUES ('${id}', ${connection.escape(
+                noteContent
+            )}, '${formatedDate}', '${formatedDate}')`;
+
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                } else {
+                    return resolve(id);
+                }
+            });
         });
     },
     async modifyNote(noteID: string, noteContent: string): Promise<boolean> {
@@ -245,6 +286,39 @@ export default {
                 }
             });
             // return true;
+        });
+    },
+    async getUserFromSession(session_id: string): Promise<null | UserData> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+
+            var query = `SELECT * FROM users WHERE id = (SELECT user_id FROM user_session WHERE session_id = ${connection.escape(
+                session_id
+            )})`;
+            console.log(query);
+
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result?.length == 0) {
+                    return resolve(null);
+                }
+
+                const data = result[0];
+
+                var userData = new UserData(
+                    data["id"],
+                    data["name"],
+                    data["email"],
+                    data["profile_picture"],
+                    data["description"]
+                );
+                return resolve(userData);
+            });
         });
     },
     async getUserData(

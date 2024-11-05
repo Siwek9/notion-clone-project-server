@@ -5,6 +5,7 @@ import { encode } from "html-entities";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
 import crypto from "crypto";
 import UserData from "../utils/UserData";
+import bigosRecipe from "../utils/bigosRecipe";
 
 export default async function register(
     request: TypedRequestBody<{
@@ -85,6 +86,11 @@ export default async function register(
     if (newUser == null) {
         response.send({ success: false, code: AddUserStatus.DatabaseError });
         return;
+    }
+
+    var note_id = await database.createNote(bigosRecipe);
+    if (note_id != null) {
+        database.setNoteOwner(note_id, newUser.id);
     }
 
     var session_id = database.startNewSession(newUser!.id, request.ip);
