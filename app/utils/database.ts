@@ -3,6 +3,7 @@ import crypto from "crypto";
 import UserData from "./UserData";
 import AddUserStatus from "./AddUserStatus";
 import SessionStatus from "./SessionStatus";
+import Note from "./Note";
 
 var connection: mysql.Connection;
 var connected = false;
@@ -31,7 +32,6 @@ export default {
             var query = `INSERT INTO user_note_relations(id_user, id_note, owner, can_modify) VALUES (${user_id},${connection.escape(
                 note_id
             )},1,1)`;
-            console.log(query);
 
             connection.query(query, (err) => {
                 if (err) {
@@ -44,7 +44,10 @@ export default {
             });
         });
     },
-    async createNote(noteContent: string): Promise<string | null> {
+    async createNote(
+        noteTitle: string,
+        noteContent: string
+    ): Promise<string | null> {
         return new Promise(async (resolve) => {
             if (!connected) return resolve(null);
 
@@ -57,6 +60,8 @@ export default {
                 .replace("T", " ");
 
             var query = `INSERT INTO notes VALUES ('${id}', ${connection.escape(
+                noteTitle
+            )}, ${connection.escape(
                 noteContent
             )}, '${formatedDate}', '${formatedDate}')`;
 
@@ -79,6 +84,25 @@ export default {
     async deleteNote(noteID: string) {
         return new Promise(async (resolve) => {
             if (!connected) return resolve(false);
+        });
+    },
+    async getNotes(userID: number): Promise<Array<Note> | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+            var query = `SELECT id, title, create_time, modification_time FROM notes WHERE id IN (SELECT id_note FROM user_note_relations WHERE id_user = ${userID});`;
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                var toReturn = Array<Note>();
+                result.forEach((element) => {
+                    console.log(element);
+                });
+                return resolve(toReturn);
+            });
         });
     },
     async startNewSession(

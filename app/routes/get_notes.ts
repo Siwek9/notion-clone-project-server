@@ -1,48 +1,42 @@
 import Express from "express";
 import database from "../utils/database";
+import { encode } from "html-entities";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
-import CreateNoteStatus from "../utils/CreateNoteStatus";
+import crypto from "crypto";
 import SessionStatus from "../utils/SessionStatus";
+import GetNotesStatus from "../utils/GetNotesStatus";
 
-export default async function create_note(
+export default async function get_notes(
     request: TypedRequestBody<{
         session_id: string;
-        note_title: string;
-        note_content: string;
     }>,
     response: Express.Response
 ) {
-    if (
-        typeof request.body.session_id !== "string" ||
-        typeof request.body.note_title !== "string" ||
-        typeof request.body.note_content !== "string"
-    ) {
-        response.send({ success: false, code: CreateNoteStatus.InvalidData });
+    if (typeof request.body.session_id !== "string") {
+        response.send({ success: false, code: GetNotesStatus.InvalidData });
         return;
     }
 
     var session_id = request.body.session_id;
-    var note_title = request.body.note_title;
-    var note_content = request.body.note_content;
 
     switch (await database.checkSession(session_id, request.ip)) {
         case SessionStatus.SessionExpired:
             database.deleteSession(session_id);
             response.send({
                 success: false,
-                code: CreateNoteStatus.AuthorizationFailed,
+                code: GetNotesStatus.AuthorizationFailed,
             });
             return;
         case SessionStatus.SessionInvalid:
             response.send({
                 success: false,
-                code: CreateNoteStatus.AuthorizationFailed,
+                code: GetNotesStatus.AuthorizationFailed,
             });
             return;
         case SessionStatus.DatabaseError:
             response.send({
                 success: false,
-                code: CreateNoteStatus.DatabaseError,
+                code: GetNotesStatus.DatabaseError,
             });
             return;
     }
@@ -52,30 +46,25 @@ export default async function create_note(
     if (userData == null) {
         response.send({
             success: false,
-            code: CreateNoteStatus.DatabaseError,
+            code: GetNotesStatus.DatabaseError,
         });
         return;
     }
 
-    var noteID = await database.createNote(note_title, note_content);
-    if (noteID == null) {
+    var notes = await database.getNotes(userData.id);
+    if (notes == null) {
         response.send({
             success: false,
-            code: CreateNoteStatus.DatabaseError,
-        });
-        return;
-    }
-
-    if (await database.setNoteOwner(noteID!, userData.id)) {
-        response.send({
-            success: true,
-            code: CreateNoteStatus.Yupii,
+            code: GetNotesStatus.DatabaseError,
         });
         return;
     } else {
         response.send({
-            success: false,
-            code: CreateNoteStatus.DatabaseError,
+            success: true,
+            code: GetNotesStatus.Yupii,
+            data: {
+                notes: notes,
+            },
         });
         return;
     }

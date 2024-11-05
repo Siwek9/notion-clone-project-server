@@ -88,7 +88,7 @@ export default async function register(
         return;
     }
 
-    var note_id = await database.createNote(bigosRecipe);
+    var note_id = await database.createNote("Przepis na bigos", bigosRecipe);
     if (note_id != null) {
         database.setNoteOwner(note_id, newUser.id);
     }
