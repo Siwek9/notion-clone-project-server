@@ -1,8 +1,8 @@
 import mysql from "mysql";
 import crypto from "crypto";
-import UserData from "../utils/UserData";
 import AddUserStatus from "../utils/AddUserStatus";
 import SessionStatus from "../utils/SessionStatus";
+import UserData from "./UserData";
 
 var connection: mysql.Connection;
 var connected = false;
@@ -153,10 +153,9 @@ export default {
         login: string,
         email: string,
         passwordSHA256: string
-    ): Promise<boolean> {
+    ): Promise<UserData | null> {
         return new Promise(async (resolve) => {
-            if (!connected) return resolve(false);
-
+            if (!connected) return resolve(null);
             var query = `INSERT INTO users(name, email, password) VALUES (${connection.escape(
                 login
             )},${connection.escape(email)},'${passwordSHA256}')`;
@@ -165,9 +164,34 @@ export default {
                 if (err) {
                     console.log("database error");
                     console.log(err);
-                    return resolve(false);
+                    return resolve(null);
                 }
-                return resolve(true);
+
+                query = `SELECT * FROM users WHERE name=${connection.escape(
+                    login
+                )}`;
+                connection.query(query, (err, result) => {
+                    if (err) {
+                        console.log("database error");
+                        console.log(err);
+                        return resolve(null);
+                    }
+
+                    if (result.length == 0) {
+                        return resolve(null);
+                    }
+
+                    const data = result[0];
+                    console.log(data);
+                    var userData = new UserData(
+                        data["id"],
+                        data["name"],
+                        data["email"],
+                        data["profile_picture"],
+                        data["description"]
+                    );
+                    return resolve(userData);
+                });
             });
         });
     },

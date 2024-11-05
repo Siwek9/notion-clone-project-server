@@ -4,6 +4,7 @@ import database from "../utils/database";
 import { encode } from "html-entities";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
 import crypto from "crypto";
+import UserData from "../utils/UserData";
 
 export default async function register(
     request: TypedRequestBody<{
@@ -80,10 +81,19 @@ export default async function register(
         .update(password)
         .digest("hex");
 
-    if (!(await database.addNewUser(login, email, passwordSHA256))) {
+    var newUser = await database.addNewUser(login, email, passwordSHA256);
+    if (newUser == null) {
         response.send({ success: false, code: AddUserStatus.DatabaseError });
         return;
     }
 
-    response.send({ success: true, code: AddUserStatus.Yupii });
+    var session_id = database.startNewSession(newUser!.id, request.ip);
+
+    response.send({
+        success: true,
+        code: AddUserStatus.Yupii,
+        data: {
+            session_id: session_id,
+        },
+    });
 }
