@@ -1,6 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
+import EditNotesHandler from "./app/utils/EditNotesHandler.ts";
 import database from "./app/utils/database.ts";
 import register from "./app/routes/register.ts";
 import log_in from "./app/routes/log_in.ts";
@@ -11,11 +14,21 @@ import get_notes from "./app/routes/get_notes.ts";
 import read_note from "./app/routes/read_note.ts";
 
 const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+const server = createServer(app);
 
 database.startConnection();
 
-app.use(bodyParser.json());
-app.use(cors());
+const io = new Server(server, {
+    cors: {},
+});
+
+io.on("connection", (socket) => {
+    socket.on("open_note", (session_id, note_id) =>
+        EditNotesHandler.onOpenNote(socket, session_id, note_id)
+    );
+});
 
 app.post("/create-note", create_note);
 
@@ -32,6 +45,6 @@ app.post("/register", register);
 
 app.post("/log-out", log_out);
 
-app.listen(8000, "0.0.0.0", () => {
+server.listen(8000, "0.0.0.0", () => {
     console.log("Server started");
 });

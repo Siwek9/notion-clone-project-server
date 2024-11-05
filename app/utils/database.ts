@@ -4,6 +4,7 @@ import UserData from "./UserData";
 import AddUserStatus from "./AddUserStatus";
 import SessionStatus from "./SessionStatus";
 import Note from "./Note";
+import NoteOwnership from "./NoteOwnership";
 
 var connection: mysql.Connection;
 var connected = false;
@@ -24,6 +25,36 @@ export default {
                 console.log("Connected with database.");
                 connected = true;
             }
+        });
+    },
+    async checkNoteOwnerShip(
+        user_id: number,
+        note_id: string
+    ): Promise<NoteOwnership | null> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(null);
+            var query = `SELECT owner, can_modify FROM user_note_relations WHERE id_user = ${user_id} AND id_note = ${connection.escape(
+                note_id
+            )}`;
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                } else {
+                    if (result.length == 0) {
+                        return resolve(NoteOwnership.CannotAnythink);
+                    } else {
+                        if (result[0]["owner"]) {
+                            return resolve(NoteOwnership.Owner);
+                        } else if (result[0]["can_modify"]) {
+                            return resolve(NoteOwnership.CanWrite);
+                        } else {
+                            return resolve(NoteOwnership.CanRead);
+                        }
+                    }
+                }
+            });
         });
     },
     async setNoteOwner(note_id: string, user_id: number): Promise<boolean> {
