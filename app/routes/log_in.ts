@@ -12,7 +12,6 @@ export default async function log_in(
     }>,
     response: Express.Response
 ) {
-    console.log(request.body);
     if (
         typeof request.body.loginOrEmail !== "string" ||
         typeof request.body.password !== "string"

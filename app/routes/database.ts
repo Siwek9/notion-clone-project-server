@@ -2,6 +2,7 @@ import mysql from "mysql";
 import crypto from "crypto";
 import UserData from "../utils/UserData";
 import AddUserStatus from "../utils/AddUserStatus";
+import SessionStatus from "../utils/SessionStatus";
 
 var connection: mysql.Connection;
 var connected = false;
@@ -53,17 +54,67 @@ export default {
                         console.log("database error");
                         console.log(err);
                         return resolve(null);
+                    } else {
+                        return resolve(id);
                     }
-                    return resolve(id);
                 });
+            });
+        });
+    },
+    async renewSession(session_id: string): Promise<void> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve();
+
+            var date = new Date();
+            date.setDate(date.getDate() + 1);
+
+            var query = `UPDATE user_session SET expiration_date = '${date
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ")}' WHERE session_id = ${connection.escape(
+                session_id
+            )}`;
+
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                }
+                return resolve();
             });
         });
     },
     async checkSession(
         session_id: string,
         ip_adress: string
-    ): Promise<boolean> {
-        return new Promise(async (resolve) => {});
+    ): Promise<SessionStatus> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(SessionStatus.DatabaseError);
+
+            var query = `SELECT * FROM user_session WHERE session_id = ${connection.escape(
+                session_id
+            )} AND ip_address = '${ip_adress}'`;
+
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(SessionStatus.DatabaseError);
+                }
+                if (result.length == 0) {
+                    return resolve(SessionStatus.SessionInvalid);
+                } else {
+                    var expirationDate = new Date(result[0]["expiration_date"]);
+                    var dateNow = new Date();
+                    if (expirationDate < dateNow) {
+                        return resolve(SessionStatus.SessionExpired);
+                    } else {
+                        return resolve(SessionStatus.Yupii);
+                    }
+                }
+            });
+            return resolve(SessionStatus.Yupii);
+        });
     },
     async deleteSession(session_id: string): Promise<boolean> {
         return new Promise(async (resolve) => {

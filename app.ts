@@ -7,6 +7,7 @@ import register from "./app/routes/register.ts";
 // const upload = multer({ dest: "uploads/" });
 import log_in from "./app/routes/log_in.ts";
 import log_out from "./app/routes/log_out.ts";
+import check_session from "./app/routes/check_session.ts";
 
 const app = express();
 
@@ -15,10 +16,7 @@ database.startConnection();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.post("/check-autorization", (req, res) => {
-    console.log(req.body);
-    res.send(JSON.stringify({ siema: "lol" }));
-});
+app.post("/check-session", check_session);
 
 app.post("/log-in", log_in);
 
