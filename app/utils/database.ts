@@ -25,6 +25,21 @@ export default {
             }
         });
     },
+    async createNote(noteContent: string): Promise<boolean> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(false);
+        });
+    },
+    async modifyNote(noteID: string, noteContent: string): Promise<boolean> {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(false);
+        });
+    },
+    async deleteNote(noteID: string) {
+        return new Promise(async (resolve) => {
+            if (!connected) return resolve(false);
+        });
+    },
     async startNewSession(
         user_id: number,
         ip_address: string

@@ -1,5 +1,5 @@
 import Express from "express";
-import database from "./database";
+import database from "../utils/database";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
 import SessionStatus from "../utils/SessionStatus";
 
