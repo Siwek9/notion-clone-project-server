@@ -3,15 +3,15 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import EditNotesHandler from "./app/utils/EditNotesHandler.ts";
-import database from "./app/utils/database.ts";
-import register from "./app/routes/register.ts";
-import log_in from "./app/routes/log_in.ts";
-import log_out from "./app/routes/log_out.ts";
-import check_session from "./app/routes/check_session.ts";
-import create_note from "./app/routes/create_note.ts";
-import get_notes from "./app/routes/get_notes.ts";
-import read_note from "./app/routes/read_note.ts";
+import EditNotesHandler from "./app/utils/EditNotesHandler";
+import database from "./app/utils/database";
+import register from "./app/routes/register";
+import log_in from "./app/routes/log_in";
+import log_out from "./app/routes/log_out";
+import check_session from "./app/routes/check_session";
+import create_note from "./app/routes/create_note";
+import get_notes from "./app/routes/get_notes";
+import read_note from "./app/routes/read_note";
 
 const app = express();
 app.use(cors());
@@ -26,9 +26,23 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
     socket.on("open_note", (session_id, note_id) =>
-        EditNotesHandler.onOpenNote(socket, session_id, note_id)
+        EditNotesHandler.onOpenNote(io, socket, session_id, note_id)
+    );
+    socket.on("edit_note", (session_id, note_id, note_content) =>
+        EditNotesHandler.onNoteEdited(
+            io,
+            socket,
+            session_id,
+            note_id,
+            note_content
+        )
+    );
+    socket.on("close_note", (session_id, note_id) =>
+        EditNotesHandler.onCloseNote(io, socket, session_id, note_id)
     );
 });
+
+setInterval(EditNotesHandler.saveToDatabase, 10000);
 
 app.post("/create-note", create_note);
 
