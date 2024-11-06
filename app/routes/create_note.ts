@@ -46,7 +46,6 @@ export default async function create_note(
             });
             return;
     }
-
     const userData = await database.getUserFromSession(session_id);
 
     if (userData == null) {

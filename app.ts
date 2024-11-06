@@ -25,6 +25,7 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
+    console.log("start connection");
     socket.on("open_note", (session_id, note_id) =>
         EditNotesHandler.onOpenNote(io, socket, session_id, note_id)
     );

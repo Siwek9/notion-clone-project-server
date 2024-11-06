@@ -93,7 +93,7 @@ export default async function register(
         database.setNoteOwner(note_id, newUser.id);
     }
 
-    var session_id = database.startNewSession(newUser!.id, request.ip);
+    var session_id = await database.startNewSession(newUser!.id, request.ip);
 
     response.send({
         success: true,
