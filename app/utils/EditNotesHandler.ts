@@ -70,31 +70,34 @@ export default {
     async onOpenNote(
         io: Server,
         socket: Socket,
-        session_id: string,
-        note_id: string
+        data: {
+            session_id: string;
+            note_id: string;
+        }
     ) {
         console.log("otworzono notatke");
-        const userData = await database.getUserFromSession(session_id);
+        console.log(data.session_id);
+        const userData = await database.getUserFromSession(data.session_id);
         if (userData == null) return;
         const ownership = await database.checkNoteOwnerShip(
             userData.id,
-            note_id
+            data.note_id
         );
         if (ownership == null) return;
         if (ownership == NoteOwnership.CannotAnythink) return;
 
-        var note_content = await database.getNoteContent(note_id);
+        var note_content = await database.getNoteContent(data.note_id);
         if (note_content == null) return;
 
-        addChangedNote(note_id, note_content!);
+        addChangedNote(data.note_id, note_content!);
 
         let changedNote = allChangedNotes.find(
-            (changedNote) => changedNote.note_id == note_id
+            (changedNote) => changedNote.note_id == data.note_id
         );
         if (changedNote == undefined) return;
-        changedNote.addSession(new NoteSession(session_id, ownership));
+        changedNote.addSession(new NoteSession(data.session_id, ownership));
         io.to(socket.id).emit("note_content", changedNote.note_content);
-        socket.join(note_id);
+        socket.join(data.note_id);
     },
     async saveToDatabase() {},
 };
