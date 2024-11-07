@@ -130,6 +130,26 @@ export default {
     async modifyNote(noteID: string, noteContent: string): Promise<boolean> {
         return new Promise(async (resolve) => {
             if (!connected) return resolve(false);
+
+            var date = new Date();
+
+            var formatedDate = date
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ");
+
+            var query = `UPDATE notes SET content='${noteContent}', modification_time='${formatedDate}' WHERE id='${noteID}'`;
+
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                } else {
+                    console.log("siemson robie udpate loool :P");
+                    return resolve(true);
+                }
+            });
         });
     },
     async deleteNote(noteID: string) {

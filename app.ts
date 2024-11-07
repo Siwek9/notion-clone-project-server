@@ -26,20 +26,14 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
     console.log("start connection");
-    socket.on("open_note", (session_id, note_id) =>
-        EditNotesHandler.onOpenNote(io, socket, session_id, note_id)
+    socket.on("open_note", (data) =>
+        EditNotesHandler.onOpenNote(io, socket, data)
     );
-    socket.on("edit_note", (session_id, note_id, note_content) =>
-        EditNotesHandler.onNoteEdited(
-            io,
-            socket,
-            session_id,
-            note_id,
-            note_content
-        )
+    socket.on("edit_note", (data) =>
+        EditNotesHandler.onNoteEdited(io, socket, data)
     );
-    socket.on("close_note", (session_id, note_id) =>
-        EditNotesHandler.onCloseNote(io, socket, session_id, note_id)
+    socket.on("close_note", (data) =>
+        EditNotesHandler.onCloseNote(io, socket, data)
     );
 });
 

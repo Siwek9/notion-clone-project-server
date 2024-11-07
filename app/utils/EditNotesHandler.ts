@@ -16,56 +16,69 @@ export default {
     onCloseNote(
         io: Server,
         socket: Socket,
-        session_id: string,
-        note_id: string
+        data: { session_id: string; note_id: string }
     ) {
         console.log("zamknieto notatke");
         let changedNote = allChangedNotes.find(
-            (changedNote) => changedNote.note_id == note_id
+            (changedNote) => changedNote.note_id == data.note_id
         );
 
+        console.log("siema");
+        console.log(changedNote);
+        console.log(allChangedNotes.length);
         if (changedNote == undefined) return;
+        console.log("siema2");
 
         let activeSession = changedNote.activeSessions.find(
-            (session) => session.session_id == session_id
+            (session) => session.session_id == data.session_id
         );
+        console.log(activeSession);
 
         if (activeSession == undefined) return;
+        console.log("siema3");
 
         changedNote.activeSessions.splice(
             changedNote.activeSessions.indexOf(activeSession),
             1
         );
-
         if (changedNote.activeSessions.length == 0) {
-            allChangedNotes.splice(allChangedNotes.indexOf(changedNote), 1);
+            database
+                .modifyNote(changedNote.note_id, changedNote.note_content)
+                .then((didNoteModify) => {
+                    console.log("udalo sie usunac");
+                    if (didNoteModify) {
+                        allChangedNotes.splice(
+                            allChangedNotes.indexOf(changedNote),
+                            1
+                        );
+                    }
+                });
         }
-        socket.leave(note_id);
+        console.log("siema4");
+        socket.leave(data.note_id);
     },
     onNoteEdited(
         io: Server,
         socket: Socket,
-        session_id: string,
-        note_id: string,
-        note_content: string
+        data: { session_id: string; note_id: string; note_content: string }
     ) {
         console.log("zmieniono notatke");
         let changedNote = allChangedNotes.find(
-            (changedNote) => changedNote.note_id == note_id
+            (changedNote) => changedNote.note_id == data.note_id
         );
 
         if (changedNote == undefined) return;
 
         let activeSession = changedNote.activeSessions.find(
-            (session) => session.session_id == session_id
+            (session) => session.session_id == data.session_id
         );
         if (activeSession == undefined) return;
 
         if (activeSession.ownership == NoteOwnership.CanRead) return;
 
-        changedNote.note_content = note_content;
+        changedNote.note_content = data.note_content;
 
-        io.to(note_id).emit("note_content", note_content);
+        io.to(data.note_id).emit("note_content", data.note_content);
     },
     async onOpenNote(
         io: Server,
@@ -106,6 +119,7 @@ export class ChangedNote {
     constructor(node_id: string, note_content) {
         this.note_id = node_id;
         this.note_content = note_content;
+        this.activeSessions = new Array();
     }
 
     addSession(session: NoteSession) {
