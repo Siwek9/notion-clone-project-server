@@ -20,8 +20,8 @@ export default async function log_in(
         return;
     }
 
-    var loginOrEmail = encode(request.body.loginOrEmail);
-    var passwordSHA256 = crypto
+    const loginOrEmail = encode(request.body.loginOrEmail);
+    const passwordSHA256 = crypto
         .createHash("sha256")
         .update(request.body.password)
         .digest("hex");
@@ -34,7 +34,10 @@ export default async function log_in(
         });
         return;
     }
-    var session_id = await database.startNewSession(userData!.id, request.ip!);
+    const session_id = await database.startNewSession(
+        userData!.id,
+        request.ip!
+    );
 
     response.send({
         success: true,

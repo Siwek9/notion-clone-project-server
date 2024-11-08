@@ -13,7 +13,7 @@ export default async function check_session(
         response.send({ success: false, code: SessionStatus.SessionInvalid });
         return;
     }
-    var session_status = await database.checkSession(
+    const session_status = await database.checkSession(
         request.body.session_id,
         request.ip!
     );

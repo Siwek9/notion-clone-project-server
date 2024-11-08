@@ -1,8 +1,6 @@
 import Express from "express";
 import database from "../utils/database";
-import { encode } from "html-entities";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
-import crypto from "crypto";
 import SessionStatus from "../utils/SessionStatus";
 import GetNotesStatus from "../utils/GetNotesStatus";
 
@@ -17,7 +15,7 @@ export default async function get_notes(
         return;
     }
 
-    var session_id = request.body.session_id;
+    const session_id = request.body.session_id;
 
     switch (await database.checkSession(session_id, request.ip!)) {
         case SessionStatus.SessionExpired:
@@ -51,7 +49,7 @@ export default async function get_notes(
         return;
     }
 
-    var notes = await database.getNotes(userData.id);
+    const notes = await database.getNotes(userData.id);
 
     if (notes == null) {
         response.send({

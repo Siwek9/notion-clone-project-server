@@ -15,7 +15,7 @@ export default async function log_out(
         return;
     }
 
-    var session_id = request.body.session_id;
+    const session_id = request.body.session_id;
 
     if (await database.deleteSession(session_id)) {
         response.send({

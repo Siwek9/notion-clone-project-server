@@ -21,9 +21,9 @@ export default async function create_note(
         return;
     }
 
-    var session_id = request.body.session_id;
-    var note_title = request.body.note_title;
-    var note_content = request.body.note_content;
+    const session_id = request.body.session_id;
+    const note_title = request.body.note_title;
+    const note_content = request.body.note_content;
 
     switch (await database.checkSession(session_id, request.ip!)) {
         case SessionStatus.SessionExpired:
@@ -56,7 +56,7 @@ export default async function create_note(
         return;
     }
 
-    var noteID = await database.createNote(note_title, note_content);
+    const noteID = await database.createNote(note_title, note_content);
     if (noteID == null) {
         response.send({
             success: false,

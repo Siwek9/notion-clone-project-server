@@ -1,33 +1,35 @@
 {
-  "name": "nodejs_back_end",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "",
-  "main": "app.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx watch ./app.ts"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@types/crypto-js": "^4.2.2",
-    "@types/mysql": "^2.15.26",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "express": "^4.21.1",
-    "html-entities": "^2.5.2",
-    "multer": "^1.4.5-lts.1",
-    "mysql": "^2.18.1",
-    "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/multer": "^1.4.12",
-    "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
-  }
+    "name": "nodejs_back_end",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "",
+    "main": "app.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "tsx watch ./app.ts"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@types/crypto-js": "^4.2.2",
+        "@types/mysql": "^2.15.26",
+        "body-parser": "^1.20.3",
+        "cors": "^2.8.5",
+        "express": "^4.21.1",
+        "html-entities": "^2.5.2",
+        "multer": "^1.4.5-lts.1",
+        "mysql": "^2.18.1",
+        "socket.io": "^4.8.1"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/multer": "^1.4.12",
+        "eslint": "^9.13.0",
+        "nodemon": "^3.1.7",
+        "ts-node": "^10.9.2",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3",
+        "typescript-eslint": "^8.10.0"
+    }
 }

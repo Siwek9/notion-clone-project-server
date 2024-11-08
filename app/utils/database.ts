@@ -1,13 +1,12 @@
 import mysql from "mysql";
 import crypto from "crypto";
 import UserData from "./UserData";
-import AddUserStatus from "./AddUserStatus";
 import SessionStatus from "./SessionStatus";
 import Note from "./Note";
 import NoteOwnership from "./NoteOwnership";
 
-var connection: mysql.Connection;
-var connected = false;
+let connection: mysql.Connection;
+let connected = false;
 
 export default {
     startConnection() {
@@ -31,9 +30,9 @@ export default {
         user_id: number,
         note_id: string
     ): Promise<NoteOwnership | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
-            var query = `SELECT owner, can_modify FROM user_note_relations WHERE id_user = ${user_id} AND id_note = ${connection.escape(
+            const query = `SELECT owner, can_modify FROM user_note_relations WHERE id_user = ${user_id} AND id_note = ${connection.escape(
                 note_id
             )}`;
             connection.query(query, (err, result) => {
@@ -58,9 +57,9 @@ export default {
         });
     },
     async setNoteOwner(note_id: string, user_id: number): Promise<boolean> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(false);
-            var query = `INSERT INTO user_note_relations(id_user, id_note, owner, can_modify) VALUES (${user_id},${connection.escape(
+            const query = `INSERT INTO user_note_relations(id_user, id_note, owner, can_modify) VALUES (${user_id},${connection.escape(
                 note_id
             )},1,1)`;
             connection.query(query, (err) => {
@@ -78,18 +77,18 @@ export default {
         noteTitle: string,
         noteContent: string
     ): Promise<string | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
 
             const id = crypto.randomUUID();
-            var date = new Date();
+            const date = new Date();
 
-            var formatedDate = date
+            const formatedDate = date
                 .toISOString()
                 .slice(0, 19)
                 .replace("T", " ");
 
-            var query = `INSERT INTO notes VALUES ('${id}', ${connection.escape(
+            const query = `INSERT INTO notes VALUES ('${id}', ${connection.escape(
                 noteTitle
             )}, ${connection.escape(
                 noteContent
@@ -107,9 +106,9 @@ export default {
         });
     },
     async getNoteContent(noteID: string): Promise<string | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
-            var query = `SELECT content FROM notes WHERE id = ${connection.escape(
+            const query = `SELECT content FROM notes WHERE id = ${connection.escape(
                 noteID
             )}`;
             connection.query(query, (err, result) => {
@@ -128,17 +127,17 @@ export default {
         });
     },
     async modifyNote(noteID: string, noteContent: string): Promise<boolean> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(false);
 
-            var date = new Date();
+            const date = new Date();
 
-            var formatedDate = date
+            const formatedDate = date
                 .toISOString()
                 .slice(0, 19)
                 .replace("T", " ");
 
-            var query = `UPDATE notes SET content='${noteContent}', modification_time='${formatedDate}' WHERE id='${noteID}'`;
+            const query = `UPDATE notes SET content='${noteContent}', modification_time='${formatedDate}' WHERE id='${noteID}'`;
 
             connection.query(query, (err) => {
                 if (err) {
@@ -151,15 +150,15 @@ export default {
             });
         });
     },
-    async deleteNote(noteID: string) {
-        return new Promise(async (resolve) => {
-            if (!connected) return resolve(false);
-        });
-    },
+    // async deleteNote(noteID: string) {
+    //     return new Promise(async (resolve) => {
+    //         if (!connected) return resolve(false);
+    //     });
+    // },
     async getNotes(userID: number): Promise<Array<Note> | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
-            var query = `SELECT id, title, create_time, modification_time FROM notes WHERE id IN (SELECT id_note FROM user_note_relations WHERE id_user = ${userID});`;
+            const query = `SELECT id, title, create_time, modification_time FROM notes WHERE id IN (SELECT id_note FROM user_note_relations WHERE id_user = ${userID});`;
             connection.query(query, (err, result) => {
                 if (err) {
                     console.log("database error");
@@ -167,18 +166,25 @@ export default {
                     return resolve(null);
                 }
 
-                var toReturn = Array<Note>();
-                result.forEach((element) => {
-                    toReturn.push(
-                        new Note(
-                            element["id"],
-                            element["title"],
-                            element["create_time"],
-                            element["modification_time"],
-                            undefined
-                        )
-                    );
-                });
+                const toReturn = Array<Note>();
+                result.forEach(
+                    (element: {
+                        id: string;
+                        title: string;
+                        create_time: string;
+                        modification_time: string;
+                    }) => {
+                        toReturn.push(
+                            new Note(
+                                element.id,
+                                element.title,
+                                element.create_time,
+                                element.modification_time,
+                                undefined
+                            )
+                        );
+                    }
+                );
                 return resolve(toReturn);
             });
         });
@@ -187,10 +193,10 @@ export default {
         user_id: number,
         ip_address: string
     ): Promise<string | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
 
-            var query = `DELETE FROM user_session WHERE ip_address = '${ip_address}'`;
+            const query = `DELETE FROM user_session WHERE ip_address = '${ip_address}'`;
             connection.query(query, (err) => {
                 if (err) {
                     console.log("database error");
@@ -199,10 +205,10 @@ export default {
                 }
                 const id = crypto.randomUUID();
 
-                var date = new Date();
+                const date = new Date();
                 date.setDate(date.getDate() + 1);
 
-                var query = `INSERT INTO user_session VALUES ('${id}', '${ip_address}', ${user_id}, '${date
+                const query = `INSERT INTO user_session VALUES ('${id}', '${ip_address}', ${user_id}, '${date
                     .toISOString()
                     .slice(0, 19)
                     .replace("T", " ")}')`;
@@ -220,13 +226,13 @@ export default {
         });
     },
     async renewSession(session_id: string): Promise<void> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve();
 
-            var date = new Date();
+            const date = new Date();
             date.setDate(date.getDate() + 1);
 
-            var query = `UPDATE user_session SET expiration_date = '${date
+            const query = `UPDATE user_session SET expiration_date = '${date
                 .toISOString()
                 .slice(0, 19)
                 .replace("T", " ")}' WHERE session_id = ${connection.escape(
@@ -246,10 +252,10 @@ export default {
         session_id: string,
         ip_adress: string
     ): Promise<SessionStatus> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(SessionStatus.DatabaseError);
 
-            var query = `SELECT * FROM user_session WHERE session_id = ${connection.escape(
+            const query = `SELECT * FROM user_session WHERE session_id = ${connection.escape(
                 session_id
             )} AND ip_address = '${ip_adress}'`;
 
@@ -262,8 +268,10 @@ export default {
                 if (result.length == 0) {
                     return resolve(SessionStatus.SessionInvalid);
                 } else {
-                    var expirationDate = new Date(result[0]["expiration_date"]);
-                    var dateNow = new Date();
+                    const expirationDate = new Date(
+                        result[0]["expiration_date"]
+                    );
+                    const dateNow = new Date();
                     if (expirationDate < dateNow) {
                         return resolve(SessionStatus.SessionExpired);
                     } else {
@@ -275,10 +283,10 @@ export default {
         });
     },
     async deleteSession(session_id: string): Promise<boolean> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(false);
 
-            var query = `DELETE FROM user_session WHERE session_id = ${connection.escape(
+            const query = `DELETE FROM user_session WHERE session_id = ${connection.escape(
                 session_id
             )}`;
 
@@ -297,9 +305,9 @@ export default {
         email: string,
         passwordSHA256: string
     ): Promise<UserData | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
-            var query = `INSERT INTO users(name, email, password) VALUES (${connection.escape(
+            let query = `INSERT INTO users(name, email, password) VALUES (${connection.escape(
                 login
             )},${connection.escape(email)},'${passwordSHA256}')`;
 
@@ -325,7 +333,7 @@ export default {
                     }
 
                     const data = result[0];
-                    var userData = new UserData(
+                    const userData = new UserData(
                         data["id"],
                         data["name"],
                         data["email"],
@@ -338,10 +346,10 @@ export default {
         });
     },
     async isEmailUsed(email: string): Promise<boolean | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
 
-            var query = `SELECT COUNT(*) AS amount FROM users WHERE email = ${connection.escape(
+            const query = `SELECT COUNT(*) AS amount FROM users WHERE email = ${connection.escape(
                 email
             )}`;
 
@@ -366,10 +374,10 @@ export default {
         });
     },
     async isLoginUsed(login: string): Promise<boolean | null> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
 
-            var query = `SELECT COUNT(*) FROM users WHERE name = ${connection.escape(
+            const query = `SELECT COUNT(*) FROM users WHERE name = ${connection.escape(
                 login
             )}`;
 
@@ -390,9 +398,9 @@ export default {
         });
     },
     async getUserFromSession(session_id: string): Promise<null | UserData> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
-            var query = `SELECT * FROM users WHERE id = (SELECT user_id FROM user_session WHERE session_id = ${connection.escape(
+            const query = `SELECT * FROM users WHERE id = (SELECT user_id FROM user_session WHERE session_id = ${connection.escape(
                 session_id
             )})`;
 
@@ -408,7 +416,7 @@ export default {
 
                 const data = result[0];
 
-                var userData = new UserData(
+                const userData = new UserData(
                     data["id"],
                     data["name"],
                     data["email"],
@@ -423,10 +431,10 @@ export default {
         loginOrEmail: string,
         passwordSHA256: string
     ): Promise<null | UserData> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             if (!connected) return resolve(null);
 
-            var query = `SELECT * FROM users WHERE (name = ${connection.escape(
+            const query = `SELECT * FROM users WHERE (name = ${connection.escape(
                 loginOrEmail
             )} or email = '${loginOrEmail}') and password = '${passwordSHA256}'`;
 
@@ -443,7 +451,7 @@ export default {
 
                 const data = result[0];
 
-                var userData = new UserData(
+                const userData = new UserData(
                     data["id"],
                     data["name"],
                     data["email"],
