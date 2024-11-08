@@ -43,7 +43,7 @@ export default {
                     return resolve(null);
                 } else {
                     if (result.length == 0) {
-                        return resolve(NoteOwnership.CannotAnythink);
+                        return resolve(NoteOwnership.CannotAnything);
                     } else {
                         if (result[0]["owner"]) {
                             return resolve(NoteOwnership.Owner);
@@ -395,7 +395,7 @@ export default {
             var query = `SELECT * FROM users WHERE id = (SELECT user_id FROM user_session WHERE session_id = ${connection.escape(
                 session_id
             )})`;
-            
+
             connection.query(query, (err, result) => {
                 if (err) {
                     console.log("database error");

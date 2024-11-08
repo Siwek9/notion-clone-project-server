@@ -2,7 +2,7 @@ enum NoteOwnership {
     Owner,
     CanWrite,
     CanRead,
-    CannotAnythink,
+    CannotAnything,
 }
 
 export default NoteOwnership;

@@ -81,7 +81,7 @@ export default {
         }
     ) {
         console.log("otworzono notatke");
-        
+
         const userData = await database.getUserFromSession(data.session_id);
         if (userData == null) return;
         const ownership = await database.checkNoteOwnerShip(
@@ -89,7 +89,7 @@ export default {
             data.note_id
         );
         if (ownership == null) return;
-        if (ownership == NoteOwnership.CannotAnythink) return;
+        if (ownership == NoteOwnership.CannotAnything) return;
 
         var note_content = await database.getNoteContent(data.note_id);
         if (note_content == null) return;
