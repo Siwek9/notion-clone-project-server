@@ -15,7 +15,7 @@ export default async function check_session(
     }
     var session_status = await database.checkSession(
         request.body.session_id,
-        request.ip
+        request.ip!
     );
     switch (session_status) {
         case 0:

@@ -42,6 +42,7 @@ setInterval(EditNotesHandler.saveToDatabase, 10000);
 app.post("/create-note", create_note);
 
 app.post("/get-notes", get_notes);
+
 app.post("/read-note", read_note);
 app.post("/delete-note", () => {});
 app.post("/get-profile-data", () => {});

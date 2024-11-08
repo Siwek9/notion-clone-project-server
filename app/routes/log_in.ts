@@ -34,7 +34,7 @@ export default async function log_in(
         });
         return;
     }
-    var session_id = await database.startNewSession(userData!.id, request.ip);
+    var session_id = await database.startNewSession(userData!.id, request.ip!);
 
     response.send({
         success: true,

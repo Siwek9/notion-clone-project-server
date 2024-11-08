@@ -25,7 +25,7 @@ export default async function create_note(
     var note_title = request.body.note_title;
     var note_content = request.body.note_content;
 
-    switch (await database.checkSession(session_id, request.ip)) {
+    switch (await database.checkSession(session_id, request.ip!)) {
         case SessionStatus.SessionExpired:
             database.deleteSession(session_id);
             response.send({

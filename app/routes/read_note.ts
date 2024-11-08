@@ -24,7 +24,7 @@ export default async function read_note(
     var session_id = request.body.session_id;
     var node_id = request.body.note_id;
 
-    switch (await database.checkSession(session_id, request.ip)) {
+    switch (await database.checkSession(session_id, request.ip!)) {
         case SessionStatus.SessionExpired:
             database.deleteSession(session_id);
             response.send({
