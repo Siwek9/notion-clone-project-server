@@ -65,10 +65,13 @@ export default async function create_note(
         return;
     }
 
-    if (await database.setNoteOwner(noteID!, userData.id)) {
+    if (await database.setNoteOwner(noteID, userData.id)) {
         response.send({
             success: true,
             code: CreateNoteStatus.Yupii,
+            data: {
+                noteID: noteID,
+            },
         });
         return;
     } else {
