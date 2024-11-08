@@ -23,19 +23,13 @@ export default {
             (changedNote) => changedNote.note_id == data.note_id
         );
 
-        console.log("siema");
-        console.log(changedNote);
-        console.log(allChangedNotes.length);
         if (changedNote == undefined) return;
-        console.log("siema2");
 
         let activeSession = changedNote.activeSessions.find(
             (session) => session.session_id == data.session_id
         );
-        console.log(activeSession);
 
         if (activeSession == undefined) return;
-        console.log("siema3");
 
         changedNote.activeSessions.splice(
             changedNote.activeSessions.indexOf(activeSession),
@@ -45,16 +39,14 @@ export default {
             database
                 .modifyNote(changedNote.note_id, changedNote.note_content)
                 .then((didNoteModify) => {
-                    console.log("udalo sie usunac");
                     if (didNoteModify) {
                         allChangedNotes.splice(
-                            allChangedNotes.indexOf(changedNote),
+                            allChangedNotes.indexOf(changedNote!),
                             1
                         );
                     }
                 });
         }
-        console.log("siema4");
         socket.leave(data.note_id);
     },
     onNoteEdited(
@@ -89,7 +81,7 @@ export default {
         }
     ) {
         console.log("otworzono notatke");
-        console.log(data.session_id);
+        
         const userData = await database.getUserFromSession(data.session_id);
         if (userData == null) return;
         const ownership = await database.checkNoteOwnerShip(

@@ -146,7 +146,6 @@ export default {
                     console.log(err);
                     return resolve(false);
                 } else {
-                    console.log("siemson robie udpate loool :P");
                     return resolve(true);
                 }
             });
@@ -393,11 +392,10 @@ export default {
     async getUserFromSession(session_id: string): Promise<null | UserData> {
         return new Promise(async (resolve) => {
             if (!connected) return resolve(null);
-            console.log(session_id);
             var query = `SELECT * FROM users WHERE id = (SELECT user_id FROM user_session WHERE session_id = ${connection.escape(
                 session_id
             )})`;
-            console.log(query);
+            
             connection.query(query, (err, result) => {
                 if (err) {
                     console.log("database error");
