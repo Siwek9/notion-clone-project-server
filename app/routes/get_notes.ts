@@ -1,8 +1,8 @@
 import Express from "express";
 import database from "../utils/database";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
-import SessionStatus from "../utils/SessionStatus";
-import GetNotesStatus from "../utils/GetNotesStatus";
+import SessionStatus from "../statuses/SessionStatus";
+import GetNotesStatus from "../statuses/GetNotesStatus";
 
 export default async function get_notes(
     request: TypedRequestBody<{

@@ -1,7 +1,7 @@
 import mysql from "mysql";
 import crypto from "crypto";
 import UserData from "./UserData";
-import SessionStatus from "./SessionStatus";
+import SessionStatus from "../statuses/SessionStatus";
 import Note from "./Note";
 import NoteOwnership from "./NoteOwnership";
 

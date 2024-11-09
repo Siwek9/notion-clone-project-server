@@ -1,6 +1,6 @@
 import Express from "express";
 import database from "../utils/database";
-import LogoutStatus from "../utils/LogoutStatus";
+import LogoutStatus from "../statuses/LogoutStatus";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
 
 export default async function log_out(

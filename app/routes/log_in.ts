@@ -1,5 +1,5 @@
 import Express from "express";
-import LoginStatus from "../utils/LoginStatus";
+import LoginStatus from "../statuses/LoginStatus";
 import database from "../utils/database";
 import { encode } from "html-entities";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
