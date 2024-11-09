@@ -26,7 +26,10 @@ export default async function log_in(
         .update(request.body.password)
         .digest("hex");
 
-    const userData = await database.getUserData(loginOrEmail, passwordSHA256);
+    const userData = await database.getUserDataWithPassword(
+        loginOrEmail,
+        passwordSHA256
+    );
     if (userData == null) {
         response.send({
             success: false,

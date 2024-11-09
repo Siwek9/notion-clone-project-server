@@ -2,19 +2,23 @@ import Express from "express";
 import database from "../utils/database";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
 import SessionStatus from "../statuses/SessionStatus";
-import GetProfileDataStatus from "../statuses/GetProfileDataStatus";
+import SendFriendRequestStatus from "../statuses/SendFriendRequestStatus";
 // import GetNotesStatus from "../statuses/GetNotesStatus";
 
-export default async function get_profile_data(
+export default async function send_friend_request(
     request: TypedRequestBody<{
         session_id: string;
+        loginOrEmail: string;
     }>,
     response: Express.Response
 ) {
-    if (typeof request.body.session_id !== "string") {
+    if (
+        typeof request.body.session_id !== "string" ||
+        typeof request.body.loginOrEmail !== "string"
+    ) {
         response.send({
             success: false,
-            code: GetProfileDataStatus.InvalidData,
+            code: SendFriendRequestStatus.InvalidData,
         });
         return;
     }
@@ -26,19 +30,19 @@ export default async function get_profile_data(
             database.deleteSession(session_id);
             response.send({
                 success: false,
-                code: GetProfileDataStatus.AuthorizationFailed,
+                code: SendFriendRequestStatus.AuthorizationFailed,
             });
             return;
         case SessionStatus.SessionInvalid:
             response.send({
                 success: false,
-                code: GetProfileDataStatus.AuthorizationFailed,
+                code: SendFriendRequestStatus.AuthorizationFailed,
             });
             return;
         case SessionStatus.DatabaseError:
             response.send({
                 success: false,
-                code: GetProfileDataStatus.DatabaseError,
+                code: SendFriendRequestStatus.DatabaseError,
             });
             return;
     }
@@ -48,33 +52,22 @@ export default async function get_profile_data(
     if (userData == null) {
         response.send({
             success: false,
-            code: GetProfileDataStatus.DatabaseError,
+            code: SendFriendRequestStatus.DatabaseError,
         });
         return;
     }
 
-    const friendRequests = await database.getUsersFromFriendRequest(
-        userData.id
+    const userToSendRequest = await database.getUserData(
+        request.body.loginOrEmail
     );
 
-    if (friendRequests == null) {
+    if (userToSendRequest == null) {
         response.send({
-            success: false,
-            code: GetProfileDataStatus.DatabaseError,
+            success: true,
+            code: SendFriendRequestStatus.Yupii,
         });
         return;
     }
 
-    const friends = await database.getFriends(userData.id);
-
-    response.send({
-        success: true,
-        code: GetProfileDataStatus.Yupii,
-        data: {
-            userData: userData,
-            friendRequests: friendRequests,
-            friends: friends,
-        },
-    });
-    return;
+    await database.sendFriendRequest(userData.id, userToSendRequest.id);
 }

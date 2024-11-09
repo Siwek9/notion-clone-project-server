@@ -4,6 +4,7 @@ import UserData from "./UserData";
 import SessionStatus from "../statuses/SessionStatus";
 import Note from "./Note";
 import NoteOwnership from "./NoteOwnership";
+import FriendRequest from "./FriendRequest";
 
 let connection: mysql.Connection;
 let connected = false;
@@ -24,6 +25,151 @@ export default {
                 console.log("Connected with database.");
                 connected = true;
             }
+        });
+    },
+    async getFriends(user_id: number): Promise<Array<{
+        name: string;
+        profile_picture: string;
+    }> | null> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(null);
+            const query = `SELECT name, profile_picture FROM users WHERE id IN (SELECT user1_id FROM user_friends WHERE user2_id = ${user_id}) OR id IN (SELECT user2_id FROM user_friends WHERE user1_id = ${user_id})`;
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result.lenght == 0) {
+                    return resolve(null);
+                }
+
+                const toReturn = Array<{
+                    name: string;
+                    profile_picture: string;
+                }>();
+                result.forEach(
+                    (element: { name: string; profile_picture: string }) => {
+                        toReturn.push(element);
+                    }
+                );
+                return resolve(result);
+            });
+        });
+    },
+    async getUsersFromFriendRequest(receiver_id: number): Promise<Array<{
+        name: string;
+        profile_picture: string;
+        request_id: string;
+    }> | null> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(null);
+            const query = `SELECT users.name, users.profile_picture, request.request_id FROM users, (SELECT id AS request_id, user_inviting_id FROM friend_requests WHERE user_receiving_id = ${receiver_id}) AS request WHERE users.id = request.user_inviting_id`;
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result.lenght == 0) {
+                    return resolve(null);
+                }
+
+                const toReturn = Array<{
+                    name: string;
+                    profile_picture: string;
+                    request_id: string;
+                }>();
+                result.forEach(
+                    (element: {
+                        name: string;
+                        profile_picture: string;
+                        request_id: string;
+                    }) => {
+                        toReturn.push(element);
+                    }
+                );
+                return resolve(result);
+            });
+        });
+    },
+    async addFriend(user1_id: number, user2_id: number): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(false);
+
+            const id = crypto.randomUUID();
+
+            const query = `INSERT INTO friend_requests VALUES ('${id}',${user1_id},${user2_id})`;
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                } else {
+                    return resolve(true);
+                }
+            });
+        });
+    },
+    async getFriendRequest(request_id: string): Promise<FriendRequest | null> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(null);
+            const query = `SELECT * FROM friend_requests WHERE id = ${connection.escape(
+                request_id
+            )};`;
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                const content: {
+                    id: string;
+                    user_inviting_id: number;
+                    user_receiving_id: number;
+                    send_time: string;
+                } = result[0];
+
+                console.log(content);
+                const friendRequest = new FriendRequest(
+                    content.id,
+                    content.user_inviting_id,
+                    content.user_receiving_id,
+                    content.send_time
+                );
+
+                return friendRequest;
+            });
+        });
+    },
+    async sendFriendRequest(
+        user_inviting_id: number,
+        user_receiving_id: number
+    ): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(false);
+
+            const id = crypto.randomUUID();
+            const date = new Date();
+
+            const formatedDate = date
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ");
+
+            const query = `INSERT INTO friend_requests VALUES ('${id}',${user_inviting_id},${user_receiving_id},'${formatedDate}')`;
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                } else {
+                    return resolve(true);
+                }
+            });
         });
     },
     async checkNoteOwnerShip(
@@ -427,7 +573,39 @@ export default {
             });
         });
     },
-    async getUserData(
+    async getUserData(loginOrEmail: string): Promise<null | UserData> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(null);
+
+            const query = `SELECT * FROM users WHERE (name = ${connection.escape(
+                loginOrEmail
+            )} or email = ${connection.escape(loginOrEmail)})`;
+
+            connection.query(query, (err, result) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(null);
+                }
+
+                if (result?.length == 0) {
+                    return resolve(null);
+                }
+
+                const data = result[0];
+
+                const userData = new UserData(
+                    data["id"],
+                    data["name"],
+                    data["email"],
+                    data["profile_picture"],
+                    data["description"]
+                );
+                return resolve(userData);
+            });
+        });
+    },
+    async getUserDataWithPassword(
         loginOrEmail: string,
         passwordSHA256: string
     ): Promise<null | UserData> {

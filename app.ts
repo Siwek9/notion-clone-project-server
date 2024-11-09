@@ -12,6 +12,8 @@ import check_session from "./app/routes/check_session";
 import create_note from "./app/routes/create_note";
 import get_notes from "./app/routes/get_notes";
 import read_note from "./app/routes/read_note";
+import send_friend_request from "./app/routes/send_friend_request";
+import accept_friend_request from "./app/routes/accept_friend_request";
 
 const app = express();
 app.use(cors());
@@ -44,8 +46,22 @@ app.post("/create-note", create_note);
 app.post("/get-notes", get_notes);
 
 app.post("/read-note", read_note);
+
 app.post("/delete-note", () => {});
+
 app.post("/get-profile-data", () => {});
+
+app.post("/change-note-title", () => {});
+
+app.post("/change-password", () => {});
+
+app.post("/change-email", () => {});
+
+app.post("/change-login", () => {});
+
+app.post("/send-friend-request", send_friend_request);
+
+app.post("/accept-friend-request", accept_friend_request);
 
 app.post("/check-session", check_session);
 
