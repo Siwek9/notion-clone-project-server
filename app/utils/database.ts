@@ -101,7 +101,25 @@ export default {
 
             const id = crypto.randomUUID();
 
-            const query = `INSERT INTO friend_requests VALUES ('${id}',${user1_id},${user2_id})`;
+            const query = `INSERT INTO user_friends VALUES ('${id}',${user1_id},${user2_id})`;
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                } else {
+                    return resolve(true);
+                }
+            });
+        });
+    },
+    async removeFriendRequest(request_id: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(false);
+
+            const query = `DELETE FROM friend_requests WHERE id = ${connection.escape(
+                request_id
+            )}`;
             connection.query(query, (err) => {
                 if (err) {
                     console.log("database error");
@@ -118,13 +136,15 @@ export default {
             if (!connected) return resolve(null);
             const query = `SELECT * FROM friend_requests WHERE id = ${connection.escape(
                 request_id
-            )};`;
+            )}`;
             connection.query(query, (err, result) => {
                 if (err) {
                     console.log("database error");
                     console.log(err);
                     return resolve(null);
                 }
+
+                console.log(result);
 
                 const content: {
                     id: string;
@@ -134,14 +154,16 @@ export default {
                 } = result[0];
 
                 console.log(content);
+
                 const friendRequest = new FriendRequest(
                     content.id,
                     content.user_inviting_id,
                     content.user_receiving_id,
                     content.send_time
                 );
+                console.log(friendRequest);
 
-                return friendRequest;
+                return resolve(friendRequest);
             });
         });
     },
@@ -152,23 +174,39 @@ export default {
         return new Promise((resolve) => {
             if (!connected) return resolve(false);
 
-            const id = crypto.randomUUID();
-            const date = new Date();
+            let query = `SELECT COUNT(*) AS amount FROM friend_requests WHERE (user_inviting_id = ${user_inviting_id} AND user_receiving_id = ${user_receiving_id}) OR (user_inviting_id = ${user_receiving_id} AND user_receiving_id = ${user_inviting_id})`;
 
-            const formatedDate = date
-                .toISOString()
-                .slice(0, 19)
-                .replace("T", " ");
-
-            const query = `INSERT INTO friend_requests VALUES ('${id}',${user_inviting_id},${user_receiving_id},'${formatedDate}')`;
-            connection.query(query, (err) => {
+            connection.query(query, (err, result) => {
                 if (err) {
                     console.log("database error");
                     console.log(err);
                     return resolve(false);
-                } else {
+                }
+                if (result.lenght == 0) {
+                    return resolve(false);
+                }
+                if (result[0]["amount"] > 0) {
                     return resolve(true);
                 }
+
+                const id = crypto.randomUUID();
+                const date = new Date();
+
+                const formatedDate = date
+                    .toISOString()
+                    .slice(0, 19)
+                    .replace("T", " ");
+
+                query = `INSERT INTO friend_requests VALUES ('${id}',${user_inviting_id},${user_receiving_id},'${formatedDate}')`;
+                connection.query(query, (err) => {
+                    if (err) {
+                        console.log("database error");
+                        console.log(err);
+                        return resolve(false);
+                    } else {
+                        return resolve(true);
+                    }
+                });
             });
         });
     },

@@ -21,7 +21,6 @@ export default async function send_friend_request(
         });
         return;
     }
-    console.log("siema");
 
     const session_id = request.body.session_id;
 
@@ -46,7 +45,6 @@ export default async function send_friend_request(
             });
             return;
     }
-    console.log("siema1");
 
     const userData = await database.getUserFromSession(session_id);
 
@@ -57,7 +55,6 @@ export default async function send_friend_request(
         });
         return;
     }
-    console.log("siema2");
 
     const friendRequest = await database.getFriendRequest(
         request.body.request_id
@@ -70,7 +67,6 @@ export default async function send_friend_request(
         });
         return;
     }
-    console.log("siema3");
 
     if (friendRequest.inviterID != userData.id) {
         response.send({
@@ -79,18 +75,8 @@ export default async function send_friend_request(
         });
         return;
     }
-    console.log("siema4");
 
     if (!(await database.removeFriendRequest(friendRequest.id))) {
-        response.send({
-            success: false,
-            code: AcceptFriendRequestStatus.DatabaseError,
-        });
-        return;
-    }
-    console.log("siema5");
-
-    if (!(await database.addFriend(friendRequest.receiverID, userData.id))) {
         response.send({
             success: false,
             code: AcceptFriendRequestStatus.DatabaseError,

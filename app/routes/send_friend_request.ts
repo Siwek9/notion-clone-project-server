@@ -3,7 +3,6 @@ import database from "../utils/database";
 import { TypedRequestBody } from "../utils/TypedRequestBody";
 import SessionStatus from "../statuses/SessionStatus";
 import SendFriendRequestStatus from "../statuses/SendFriendRequestStatus";
-// import GetNotesStatus from "../statuses/GetNotesStatus";
 
 export default async function send_friend_request(
     request: TypedRequestBody<{
@@ -69,5 +68,25 @@ export default async function send_friend_request(
         return;
     }
 
-    await database.sendFriendRequest(userData.id, userToSendRequest.id);
+    if (userData.id == userToSendRequest.id) {
+        response.send({
+            success: true,
+            code: SendFriendRequestStatus.Yupii,
+        });
+        return;
+    }
+
+    if (await database.sendFriendRequest(userData.id, userToSendRequest.id)) {
+        response.send({
+            success: true,
+            code: SendFriendRequestStatus.Yupii,
+        });
+        return;
+    } else {
+        response.send({
+            success: false,
+            code: SendFriendRequestStatus.DatabaseError,
+        });
+        return;
+    }
 }

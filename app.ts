@@ -15,6 +15,7 @@ import read_note from "./app/routes/read_note";
 import send_friend_request from "./app/routes/send_friend_request";
 import accept_friend_request from "./app/routes/accept_friend_request";
 import get_profile_data from "./app/routes/get_profile_data";
+import deny_friend_request from "./app/routes/deny_friend_request";
 
 const app = express();
 app.use(cors());
@@ -61,6 +62,8 @@ app.post("/change-email", () => {});
 app.post("/change-login", () => {});
 
 app.post("/send-friend-request", send_friend_request);
+
+app.post("/deny-friend-request", deny_friend_request);
 
 app.post("/accept-friend-request", accept_friend_request);
 
