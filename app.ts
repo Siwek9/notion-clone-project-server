@@ -16,6 +16,8 @@ import send_friend_request from "./app/routes/send_friend_request";
 import accept_friend_request from "./app/routes/accept_friend_request";
 import get_profile_data from "./app/routes/get_profile_data";
 import deny_friend_request from "./app/routes/deny_friend_request";
+import get_friend_list from "./app/routes/get_friend_list";
+import share_note from "./app/routes/share_note";
 
 const app = express();
 app.use(cors());
@@ -50,6 +52,10 @@ app.post("/get-notes", get_notes);
 app.post("/read-note", read_note);
 
 app.post("/delete-note", () => {});
+
+app.post("/share-note", share_note);
+
+app.post("/get-friend-list", get_friend_list);
 
 app.post("/get-profile-data", get_profile_data);
 

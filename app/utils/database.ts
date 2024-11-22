@@ -5,6 +5,7 @@ import SessionStatus from "../statuses/SessionStatus";
 import Note from "./Note";
 import NoteOwnership from "./NoteOwnership";
 import FriendRequest from "./FriendRequest";
+import ShareMode from "./ShareMode";
 
 let connection: mysql.Connection;
 let connected = false;
@@ -25,6 +26,24 @@ export default {
                 console.log("Connected with database.");
                 connected = true;
             }
+        });
+    },
+    async giveUserNotePrivilages(
+        user_id: number,
+        note_id: string,
+        share_mode: ShareMode
+    ): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(false);
+            const query = `INSERT INTO user_note_relations(id_user, id_note, owner, can_modify) VALUES (${user_id},'${note_id}',0,${share_mode})`;
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                }
+                return resolve(true);
+            });
         });
     },
     async getFriends(user_id: number): Promise<Array<{

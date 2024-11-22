@@ -108,7 +108,7 @@ export default {
 };
 
 export class ChangedNote {
-    constructor(node_id: string, note_content) {
+    constructor(node_id: string, note_content: string) {
         this.note_id = node_id;
         this.note_content = note_content;
         this.activeSessions = new Array();
