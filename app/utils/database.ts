@@ -28,6 +28,32 @@ export default {
             }
         });
     },
+    async deleteNote(note_id: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (!connected) return resolve(false);
+            let query = `DELETE FROM notes WHERE id = ${connection.escape(
+                note_id
+            )}`;
+            connection.query(query, (err) => {
+                if (err) {
+                    console.log("database error");
+                    console.log(err);
+                    return resolve(false);
+                }
+                query = `DELETE FROM user_note_relations WHERE id_note = ${connection.escape(
+                    note_id
+                )}`;
+                connection.query(query, (err) => {
+                    if (err) {
+                        console.log("database error");
+                        console.log(err);
+                        return resolve(false);
+                    }
+                    return resolve(true);
+                });
+            });
+        });
+    },
     async giveUserNotePrivilages(
         user_id: number,
         note_id: string,

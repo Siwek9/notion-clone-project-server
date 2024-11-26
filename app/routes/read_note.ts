@@ -20,7 +20,7 @@ export default async function read_note(
     }
 
     const session_id = request.body.session_id;
-    const node_id = request.body.note_id;
+    const note_id = request.body.note_id;
 
     switch (await database.checkSession(session_id, request.ip!)) {
         case SessionStatus.SessionExpired:
@@ -54,9 +54,11 @@ export default async function read_note(
         return;
     }
 
-    const note = await database.getNoteContent(node_id);
+    const note = await database.getNoteContent(note_id);
 
-    if (note == null) {
+    const ownership = await database.checkNoteOwnerShip(userData.id, note_id);
+
+    if (note == null || ownership == null) {
         response.send({
             success: false,
             code: ReadNoteStatus.DatabaseError,
@@ -68,6 +70,7 @@ export default async function read_note(
             code: ReadNoteStatus.Yupii,
             data: {
                 noteContent: note,
+                ownership: ownership,
             },
         });
         return;
